@@ -1,6 +1,8 @@
 import React from 'react';
 import heeraLogo from './images/Heera Logo.png';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const translations = {
   mr: {
     cta: 'सहभागी व्हा',
@@ -269,7 +271,7 @@ function SubmissionForm({ language, onSubmitSuccess }) {
     if (formData.photo) data.append('photo', formData.photo);
 
     try {
-      const response = await fetch('http://localhost:5000/api/campaign/submit', {
+      const response = await fetch(`${API_BASE_URL}/api/campaign/submit`, {
         method: 'POST',
         body: data,
       });
