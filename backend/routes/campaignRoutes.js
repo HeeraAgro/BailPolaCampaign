@@ -1,34 +1,18 @@
 const express = require('express');
-const fs = require('fs');
+const { v2: cloudinary } = require('cloudinary');
 const multer = require('multer');
 const path = require('path');
 const Submission = require('../models/Submission');
 
 const router = express.Router();
-const uploadDirectory = path.join(__dirname, '..', 'uploads');
-
-fs.mkdirSync(uploadDirectory, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDirectory);
-  },
-  filename: (req, file, cb) => {
-    const namePart = (req.body.fullName || 'farmer')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .slice(0, 30);
-
-    const uniqueSuffix = Date.now();
-    const extension = path.extname(file.originalname);
-    cb(null, `${namePart || 'farmer'}-${uniqueSuffix}${extension}`);
-  },
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png/;
@@ -42,6 +26,16 @@ const upload = multer({
     }
   },
 });
+
+const uploadToCloudinary = (buffer) =>
+  new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'bail-pola-campaign', resource_type: 'image' },
+      (error, result) => (error ? reject(error) : resolve(result)),
+    );
+
+    stream.end(buffer);
+  });
 
 const uploadSubmissionPhoto = (req, res, next) => {
   upload.single('photo')(req, res, (error) => {
@@ -86,7 +80,19 @@ router.post('/submit', uploadSubmissionPhoto, async (req, res) => {
       });
     }
 
-    const photoUrl = `/uploads/${req.file.filename}`;
+    if (
+      !process.env.CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET
+    ) {
+      return res.status(500).json({
+        success: false,
+        message: 'Cloudinary environment variables are not configured.',
+      });
+    }
+
+    const uploadedPhoto = await uploadToCloudinary(req.file.buffer);
+    const photoUrl = uploadedPhoto.secure_url;
 
     const newSubmission = new Submission({
       fullName,
