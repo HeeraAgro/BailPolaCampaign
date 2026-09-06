@@ -294,7 +294,9 @@ function SubmissionForm({ language, onSubmitSuccess }) {
         setPreview(null);
         if (onSubmitSuccess) onSubmitSuccess();
       } else {
-        setErrorMsg(result.message || 'काहीतरी चूक झाली, कृपया पुन्हा प्रयत्न करा.');
+        setErrorMsg(
+          result.message || result.error || 'काहीतरी चूक झाली, कृपया पुन्हा प्रयत्न करा.',
+        );
       }
     } catch (error) {
       console.error(error);
