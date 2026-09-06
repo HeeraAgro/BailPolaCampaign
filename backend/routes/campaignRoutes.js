@@ -1,13 +1,17 @@
 const express = require('express');
+const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
 const Submission = require('../models/Submission');
 
 const router = express.Router();
+const uploadDirectory = path.join(__dirname, '..', 'uploads');
+
+fs.mkdirSync(uploadDirectory, { recursive: true });
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, uploadDirectory);
   },
   filename: (req, file, cb) => {
     const namePart = (req.body.fullName || 'farmer')
@@ -39,7 +43,20 @@ const upload = multer({
   },
 });
 
-router.post('/submit', upload.single('photo'), async (req, res) => {
+const uploadSubmissionPhoto = (req, res, next) => {
+  upload.single('photo')(req, res, (error) => {
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message || 'Photo upload failed.',
+      });
+    }
+
+    return next();
+  });
+};
+
+router.post('/submit', uploadSubmissionPhoto, async (req, res) => {
   try {
     const {
       fullName,
