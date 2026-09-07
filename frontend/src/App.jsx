@@ -8,12 +8,14 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // Image compression utility
 const compressImage = (file) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
+    reader.onerror = () => reject(new Error('Photo could not be read.'));
     reader.onload = (event) => {
       const img = new Image();
       img.src = event.target.result;
+      img.onerror = () => reject(new Error('Photo could not be processed.'));
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -42,6 +44,11 @@ const compressImage = (file) => {
 
         canvas.toBlob(
           (blob) => {
+            if (!blob) {
+              reject(new Error('Photo compression failed.'));
+              return;
+            }
+
             const compressedFile = new File([blob], file.name, {
               type: 'image/jpeg',
               lastModified: Date.now(),
@@ -63,15 +70,15 @@ const translations = {
     headline1: 'माझा बैल,',
     headline2: 'माझा अभिमान! ❤️',
     subtitle:
-      'तुमच्या लाडक्या बैलासोबतचा फोटो आम्हाला पाठवा आणि आकर्षक बक्षिसे जिंकण्याची सुवर्ण संधी मिळवा!',
+      'तुमच्या लाडक्या बैलासोबतचा तुमचा फोटो आम्हाला पाठवा आणि आकर्षक बक्षिसे जिंकण्याची सुवर्णसंधी मिळवा!',
     heroButton: 'माझा फोटो पाठवा',
     prizeTitle: 'आकर्षक बक्षिसे',
-    prizeSubtitle: 'सहभागी व्हा आणि जिंका बक्षिसे जिंकण्याची संधी मिळवा',
-    prize1: 'प्रथम क्रमांक',
-    prize2: 'द्वितीय क्रमांक',
-    prize3: 'तृतीय क्रमांक',
-    formTitle: 'तुमच्या लाडक्या सजवलेल्या बैला सोबत चा फोटो पाठवा',
-    formSubtitle: 'फक्त ५ सेकंदात भरा आणि सहभागी व्हा!',
+    prizeSubtitle: 'आता सहभागी व्हा आणि रोख बक्षिसे जिंकण्याची सुवर्णसंधी साधा!',
+    prize1: 'प्रथम पारितोषिक',
+    prize2: 'द्वितीय पारितोषिक',
+    prize3: 'तृतीय पारितोषिक',
+    formTitle: '"माझा बैल माझा अभिमान!" स्पर्धेत सहभागी होण्यासाठी',
+    formSubtitle: 'फक्त ५ सेकंदात फॉर्म भरा, फोटो अपलोड करा आणि सबमिट करा!',
     nameLabel: 'तुमचे पूर्ण नाव',
     namePlaceholder: 'उदा. संतोष बापूराव पाटील',
     villageLabel: 'तुमचे गाव / पत्ता',
@@ -96,7 +103,7 @@ const translations = {
     privacy: 'तुमची माहिती सुरक्षित ठेवली जाईल.',
     thankYou: 'तुमचे सबमिशन यशस्वी झाले आहे!',
     thankYouText:
-      'आपल्या सहभागाबद्दल धन्यवाद. तुमच्या कडून पाठवलेल्या बैल फोटोसाठी आम्ही खूप आभारी आहोत. Heera Agro कंपनीतून तुम्हाला पुढील माहिती तसेच कृषी आणि कंपनीबद्दल अधिक जाणून घेण्यासाठी हे पेज आहे.',
+      'आपल्या सहभागाबद्दल धन्यवाद! 🙏तुमच्याकडून पाठवलेल्या बैलाच्या फोटोसाठी आम्ही मनःपूर्वक आभारी आहोत. 🐂❤️ Heera Agro कंपनीकडून तुम्हाला पुढील माहिती तसेच कृषी आणि कंपनीबद्दल अधिक जाणून घेण्यासाठी हे पेज उपयुक्त ठरेल. महत्त्वाची सूचना: तुमच्याकडून प्राप्त झालेली वैयक्तिक माहिती सुरक्षित ठेवली जाईल. तुमची माहिती कोणत्याही अनधिकृत व्यक्ती किंवा संस्थेसोबत शेअर केली जाणार नाही आणि तिचा गैरवापर होणार नाही.',
     companyTitle: 'Heera Agro बद्दल',
     companyInfo:
       'Heera Agro हे कृषी, शेतमाल आणि टिकाऊ शेतीसाठी व्यावसायिक सेवा देणारे एक विश्वासू नाव आहे. आम्ही शेतीत आधुनिक तंत्रज्ञान, गुणवत्ता आणि ग्राहकद्वेषरहित सेवा देण्यावर लक्ष केंद्रित करतो.',
@@ -114,19 +121,19 @@ const translations = {
   },
   hi: {
     cta: 'भाग लें',
-    badge: 'बेल पोळा २०२६ विशेष',
-    headline1: 'मेरा बेल,',
+    badge: 'बैल पोला २०२६ विशेष',
+    headline1: 'मेरा बैल,',
     headline2: 'मेरा अभिमान! ❤️',
     subtitle:
-      'अपने प्यारे बेल के साथ फोटो हमें भेजें और आकर्षक पुरस्कार जीतने का शानदार अवसर प्राप्त करें!',
+      'अपने प्यारे बैल के साथ की अपनी फोटो हमें भेजें और आकर्षक पुरस्कार जीतने का सुनहरा अवसर पाएं!',
     heroButton: 'फोटो भेजें',
     prizeTitle: 'रोमांचक पुरस्कार',
-    prizeSubtitle: 'भाग लें और पुरस्कार जीतने का अवसर पाएं',
-    prize1: 'पहला पुरस्कार',
-    prize2: 'दूसरा पुरस्कार',
-    prize3: 'तीसरा पुरस्कार',
-    formTitle: 'अपने प्यारे सजाए हुए बेल के साथ की फोटो भेजें।',
-    formSubtitle: 'केवल ५ सेकंड में भरें और भाग लें!',
+    prizeSubtitle: 'अभी शामिल हों और नकद पुरस्कार जीतने का सुनहरा अवसर पाएं!',
+    prize1: 'प्रथम पुरस्कार',
+    prize2: 'द्वितीय पुरस्कार',
+    prize3: 'तृतीय पुरस्कार',
+    formTitle: '"मेरा बैल,मेरा अभिमान!" प्रतियोगिता में शामिल होने के लिए',
+    formSubtitle: 'सिर्फ ५ सेकंड में फॉर्म भरें, फोटो अपलोड करें और सबमिट करें!',
     nameLabel: 'आपका पूरा नाम',
     namePlaceholder: 'उदा. संतोष बापूराव पाटील',
     villageLabel: 'आपका गांव / पता',
@@ -151,7 +158,7 @@ const translations = {
     privacy: 'आपकी जानकारी सुरक्षित रखी जाएगी।',
     thankYou: 'आपका सबमिशन सफल रहा!',
     thankYouText:
-      'भाग लेने के लिए धन्यवाद। आपके द्वारा भेजे गए बैल फोटो के लिए हम बहुत आभारी हैं। Heera Agro कंपनी के बारे में अधिक जानकारी और कृषि संबंधी अपडेट के लिए यह पेज है।',
+      'आपकी सहभागिता के लिए धन्यवाद! 🙏 आपकी ओर से भेजी गई बैल की फोटो के लिए हम आपका हार्दिक आभार व्यक्त करते हैं। 🐂❤️ Heera Agro कंपनी की ओर से आपको आगे की जानकारी तथा कृषि और कंपनी के बारे में अधिक जानने के लिए यह पेज उपयोगी रहेगा। **महत्वपूर्ण सूचना:** आपकी ओर से प्राप्त की गई व्यक्तिगत जानकारी पूरी तरह सुरक्षित रखी जाएगी। आपकी जानकारी किसी भी अनधिकृत व्यक्ति या संस्था के साथ साझा नहीं की जाएगी और इसका किसी भी प्रकार से दुरुपयोग नहीं किया जाएगा।',
     companyTitle: 'Heera Agro के बारे में',
     companyInfo:
       'Heera Agro कृषि, फसल और टिकाऊ खेती के लिए भरोसेमंद समाधान प्रदान करने वाली एक प्रसिद्ध कंपनी है। हम आधुनिक खेती, गुणवत्तापूर्ण उत्पाद और किसानों के लिए विश्वसनीय सेवा पर ध्यान केंद्रित करते हैं।',
@@ -165,7 +172,7 @@ const translations = {
     footerLabel: 'भाग लेने की तिथि',
     footerDate: '7 सितंबर २०२६ -12 सप्टेंबर २०२६, रात ११:५९ तक शानदार अवसर उपलब्ध है।',
     footerTagline: 'किसानों का भरोसा हिरा ॲग्रो इंडस्ट्रीज',
-    festival: 'बेल पोळा २०२६',
+    festival: 'बैल पोला २०२६',
   },
 };
 
@@ -267,7 +274,7 @@ function PrizesSection({ language }) {
         <div className="prize-card">
           <div className="prize-icon">🥉</div>
           <h3>{t.prize3}</h3>
-          <div className="prize-amount">₹1100</div>
+          <div className="prize-amount">₹1,100</div>
         </div>
       </div>
 
@@ -302,15 +309,26 @@ function SubmissionForm({ language, onSubmitSuccess }) {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg('फोटोचा आकार 5 MB पेक्षा कमी असावा.');
+      event.target.value = '';
+      return;
+    }
+
+    setErrorMsg('');
     setFormData((prev) => ({ ...prev, photo: file }));
     setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (loading) return;
+
     setLoading(true);
     setSuccessMsg('');
     setErrorMsg('');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
       const data = new FormData();
@@ -329,18 +347,13 @@ function SubmissionForm({ language, onSubmitSuccess }) {
         data.append('photo', compressedPhoto);
       }
 
-      // Send request with timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
       const response = await fetch(`${API_BASE_URL}/api/campaign/submit`, {
         method: 'POST',
         body: data,
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
-      const result = await response.json();
+      const result = await response.json().catch(() => ({}));
 
       if (response.ok && result.success) {
         // Clear form immediately
@@ -356,24 +369,25 @@ function SubmissionForm({ language, onSubmitSuccess }) {
           photo: null,
         });
         setPreview(null);
-        setLoading(false);
-
         // Redirect immediately to thank you page
         if (onSubmitSuccess) onSubmitSuccess();
       } else {
-        setLoading(false);
         setErrorMsg(
           result.message || result.error || 'काहीतरी चूक झाली, कृपया पुन्हा प्रयत्न करा.',
         );
       }
     } catch (error) {
-      setLoading(false);
       console.error(error);
       if (error.name === 'AbortError') {
-        setErrorMsg('अनुरोध टाइम आउट हुआ। कृपया पुन्हा प्रयत्न करा।');
+        setErrorMsg('अपलोडला जास्त वेळ लागला. कृपया पुन्हा प्रयत्न करा.');
+      } else if (error.message?.includes('Photo')) {
+        setErrorMsg('फोटो तयार करता आला नाही. कृपया दुसरा फोटो निवडा.');
       } else {
         setErrorMsg('सर्व्हरशी संपर्क साधण्यात त्रुटी. कृपया नंतर प्रयत्न करा.');
       }
+    } finally {
+      clearTimeout(timeoutId);
+      setLoading(false);
     }
   };
 
