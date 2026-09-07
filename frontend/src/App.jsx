@@ -1,5 +1,8 @@
 import React from 'react';
 import heeraLogo from './images/Heera Logo.png';
+import facebookIcon from './images/facebook.png';
+import instagramIcon from './images/Instagram.png';
+import youtubeIcon from './images/Youtube.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -17,7 +20,7 @@ const translations = {
     prize1: 'प्रथम क्रमांक',
     prize2: 'द्वितीय क्रमांक',
     prize3: 'तृतीय क्रमांक',
-    formTitle: 'तुमच्या लाडक्या बैलासोबतचा पाठवा',
+    formTitle: 'तुमच्या लाडक्या सजवलेल्या बैला सोबत चा फोटो पाठवा',
     formSubtitle: 'फक्त ५ सेकंदात भरा आणि सहभागी व्हा!',
     nameLabel: 'तुमचे पूर्ण नाव',
     namePlaceholder: 'उदा. संतोष बापूराव पाटील',
@@ -50,29 +53,29 @@ const translations = {
     visitWebsite: 'वेबसाइट भेट द्या',
     visitYoutube: 'YouTube पाहा',
     contactTitle: 'संपर्क',
-    contactPhone: '+91 98765 43210',
-    contactEmail: 'hello@heeraagro.com',
-    address: 'Heera Agro, Nashik, Maharashtra',
+    contactPhone: '+91 9370722722',
+    contactEmail: 'heerasocial01@gmail.com',
+    address: 'Heera Agro Industries Jalgaon, Maharashtra',
     backHome: 'मुख्य पृष्ठावर परत जा',
-    footerLabel: 'सहभागी होण्याची शेवटची तारीख',
-    footerDate: '२ सप्टेंबर २०२६, रात्री ११:५९ पर्यंत सुवर्ण संधी उपलब्ध.',
-    footerTagline: 'शेतकऱ्यांची विश्वासू सांगड 🇮🇳',
+    footerLabel: 'सहभागी होण्याची तारीख',
+    footerDate: '7 सप्टेंबर २०२६ - 12 सप्टेंबर २०२६, रात्री ११:५९ पर्यंत सुवर्ण संधी उपलब्ध.',
+    footerTagline: 'शेतकऱ्यांची विश्वासू हिरा ॲग्रो इंडस्ट्रीज',
     festival: 'बैल पोळा २०२६',
   },
   hi: {
     cta: 'भाग लें',
-    badge: 'बैल पोळा २०२६ विशेष',
-    headline1: 'मेरा बैल,',
+    badge: 'बेल पोळा २०२६ विशेष',
+    headline1: 'मेरा बेल,',
     headline2: 'मेरा अभिमान! ❤️',
     subtitle:
-      'अपने प्यारे बैल के साथ फोटो हमें भेजें और आकर्षक पुरस्कार जीतने का शानदार अवसर प्राप्त करें!',
-    heroButton: 'मेरा फोटो भेजें',
+      'अपने प्यारे बेल के साथ फोटो हमें भेजें और आकर्षक पुरस्कार जीतने का शानदार अवसर प्राप्त करें!',
+    heroButton: 'फोटो भेजें',
     prizeTitle: 'रोमांचक पुरस्कार',
     prizeSubtitle: 'भाग लें और पुरस्कार जीतने का अवसर पाएं',
     prize1: 'पहला पुरस्कार',
     prize2: 'दूसरा पुरस्कार',
     prize3: 'तीसरा पुरस्कार',
-    formTitle: 'अपना फोटो भेजें',
+    formTitle: 'अपने प्यारे सजाए हुए बेल के साथ की फोटो भेजें।',
     formSubtitle: 'केवल ५ सेकंड में भरें और भाग लें!',
     nameLabel: 'आपका पूरा नाम',
     namePlaceholder: 'उदा. संतोष बापूराव पाटील',
@@ -105,14 +108,14 @@ const translations = {
     visitWebsite: 'वेबसाइट देखें',
     visitYoutube: 'YouTube देखें',
     contactTitle: 'संपर्क करें',
-    contactPhone: '+91 98765 43210',
-    contactEmail: 'hello@heeraagro.com',
-    address: 'Heera Agro, नासिक, महाराष्ट्र',
+    contactPhone: '+91 9370722722',
+    contactEmail: 'heerasocial01@gmail.com',
+    address: 'Heera Agro Industries Jalgaon, Maharashtra',
     backHome: 'मुख्य पृष्ठ पर लौटें',
-    footerLabel: 'भाग लेने की अंतिम तिथि',
-    footerDate: '२ सितंबर २०२६, रात ११:५९ तक शानदार अवसर उपलब्ध है।',
-    footerTagline: 'किसानों का भरोसा 🇮🇳',
-    festival: 'बैल पोळा २०२६',
+    footerLabel: 'भाग लेने की तिथि',
+    footerDate: '7 सितंबर २०२६ -12 सप्टेंबर २०२६, रात ११:५९ तक शानदार अवसर उपलब्ध है।',
+    footerTagline: 'किसानों का भरोसा हिरा ॲग्रो इंडस्ट्रीज',
+    festival: 'बेल पोळा २०२६',
   },
 };
 
@@ -455,6 +458,24 @@ function SubmissionForm({ language, onSubmitSuccess }) {
 function Footer({ language }) {
   const t = translations[language];
 
+  const socialMedia = [
+    {
+      name: 'YouTube',
+      icon: youtubeIcon,
+      url: 'https://www.youtube.com/@HeeraAgroIndustries',
+    },
+    {
+      name: 'Facebook',
+      icon: facebookIcon,
+      url: 'https://www.facebook.com/heeraagro',
+    },
+    {
+      name: 'Instagram',
+      icon: instagramIcon,
+      url: 'https://www.instagram.com/heeraagro5?stkn=aXM0dG00czR1cjg4',
+    },
+  ];
+
   return (
     <footer className="site-footer">
       <div className="footer-shell">
@@ -466,11 +487,27 @@ function Footer({ language }) {
 
         <div className="footer-bottom">
           <div className="brand-wrap footer-brand">
-            <span className="brand-icon">🌾</span>
-            <span className="brand-name">KRUSHISAMRAT</span>
+            <img className="footer-logo" src={heeraLogo} alt="Heera Agro" />
           </div>
           <p className="footer-subtext">{t.footerTagline}</p>
-          <p className="footer-copy">© 2026 Krushisamrat. All rights reserved.</p>
+          
+          <div className="social-media-links">
+            {socialMedia.map((social) => (
+              <a
+                key={social.name}
+                href={social.url}
+                target="_blank"
+                rel="noreferrer"
+                className="social-link"
+                title={social.name}
+                aria-label={social.name}
+              >
+                <img src={social.icon} alt={social.name} className="social-icon-img" />
+              </a>
+            ))}
+          </div>
+
+          <p className="footer-copy">© 2026 Heera Agro Industries. All rights reserved.</p>
         </div>
       </div>
     </footer>

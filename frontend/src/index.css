@@ -557,13 +557,15 @@ img {
 .site-footer {
   background: #271c12;
   color: #fef3c7;
-  padding: 2.5rem 1rem;
+  padding: 3.5rem 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .footer-shell {
   max-width: 42rem;
   margin: 0 auto;
   text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .footer-topline {
@@ -572,14 +574,18 @@ img {
   justify-content: center;
   gap: 0.5rem;
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 1.3rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.5px;
 }
 
 .footer-shell p {
   margin: 0.75rem 0 0;
   color: #fcd34d;
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   font-weight: 700;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.3px;
 }
 
 .footer-bottom {
@@ -592,16 +598,73 @@ img {
   justify-content: center;
 }
 
+.footer-logo {
+  width: auto;
+  height: 3.5rem;
+  object-fit: contain;
+}
+
 .footer-subtext {
   margin-top: 0.7rem !important;
   color: rgba(253, 224, 71, 0.9) !important;
-  font-size: 0.8rem !important;
+  font-size: 1.05rem !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  letter-spacing: 0.3px;
 }
 
 .footer-copy {
   margin-top: 0.5rem !important;
   color: rgba(156, 163, 175, 0.9) !important;
-  font-size: 0.7rem !important;
+  font-size: 0.95rem !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  letter-spacing: 0.2px;
+}
+
+.social-media-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 1.5rem 0 1rem 0;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  background: #ffffff;
+  border: 2px solid #fff;
+  border-radius: 0.6rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  padding: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.social-link:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.social-link:hover .social-icon-img {
+  transform: scale(1.08);
+}
+
+.social-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .thankyou-shell {
