@@ -100,6 +100,12 @@ const translations = {
     photoNote: 'JPG / PNG - जास्तीत जास्त 5 MB',
     submit: 'माझा फोटो Submit करा',
     submitting: 'सबमिट करत आहे...',
+    preparingPhoto: 'फोटो तयार करत आहे... कृपया थांबा.',
+    uploadingPhoto: 'फोटो अपलोड करत आहे... कृपया पेज बंद करू नका.',
+    savingSubmission: 'तुमची माहिती जतन करत आहे...',
+    timeoutError: 'अपलोडला जास्त वेळ लागला. इंटरनेट तपासून पुन्हा प्रयत्न करा.',
+    photoError: 'फोटो तयार करता आला नाही. कृपया दुसरा फोटो निवडा.',
+    serverError: 'सर्व्हरशी संपर्क साधता आला नाही. कृपया पुन्हा प्रयत्न करा.',
     privacy: 'तुमची माहिती सुरक्षित ठेवली जाईल.',
     thankYou: 'तुमचे सबमिशन यशस्वी झाले आहे!',
     thankYouText:
@@ -155,6 +161,12 @@ const translations = {
     photoNote: 'JPG / PNG - अधिकतम 5 MB',
     submit: 'मेरा फोटो सबमिट करें',
     submitting: 'सबमिट किया जा रहा है...',
+    preparingPhoto: 'फोटो तैयार हो रहा है... कृपया रुकें।',
+    uploadingPhoto: 'फोटो अपलोड हो रहा है... कृपया पेज बंद न करें।',
+    savingSubmission: 'आपकी जानकारी सुरक्षित की जा रही है...',
+    timeoutError: 'अपलोड में अधिक समय लग रहा है। इंटरनेट जांचकर फिर कोशिश करें।',
+    photoError: 'फोटो तैयार नहीं हो सका। कृपया दूसरा फोटो चुनें।',
+    serverError: 'सर्वर से संपर्क नहीं हो सका। कृपया फिर कोशिश करें।',
     privacy: 'आपकी जानकारी सुरक्षित रखी जाएगी।',
     thankYou: 'आपका सबमिशन सफल रहा!',
     thankYouText:
@@ -297,6 +309,7 @@ function SubmissionForm({ language, onSubmitSuccess }) {
   });
   const [preview, setPreview] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
+  const [submitStage, setSubmitStage] = React.useState('idle');
   const [successMsg, setSuccessMsg] = React.useState('');
   const [errorMsg, setErrorMsg] = React.useState('');
 
@@ -325,10 +338,11 @@ function SubmissionForm({ language, onSubmitSuccess }) {
     if (loading) return;
 
     setLoading(true);
+    setSubmitStage('preparing');
     setSuccessMsg('');
     setErrorMsg('');
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
 
     try {
       const data = new FormData();
@@ -342,11 +356,11 @@ function SubmissionForm({ language, onSubmitSuccess }) {
       data.append('challenge', formData.challenge);
 
       if (formData.photo) {
-        // Compress image before upload
         const compressedPhoto = await compressImage(formData.photo);
         data.append('photo', compressedPhoto);
       }
 
+      setSubmitStage('uploading');
       const response = await fetch(`${API_BASE_URL}/api/campaign/submit`, {
         method: 'POST',
         body: data,
@@ -379,15 +393,16 @@ function SubmissionForm({ language, onSubmitSuccess }) {
     } catch (error) {
       console.error(error);
       if (error.name === 'AbortError') {
-        setErrorMsg('अपलोडला जास्त वेळ लागला. कृपया पुन्हा प्रयत्न करा.');
+        setErrorMsg(t.timeoutError);
       } else if (error.message?.includes('Photo')) {
-        setErrorMsg('फोटो तयार करता आला नाही. कृपया दुसरा फोटो निवडा.');
+        setErrorMsg(t.photoError);
       } else {
-        setErrorMsg('सर्व्हरशी संपर्क साधण्यात त्रुटी. कृपया नंतर प्रयत्न करा.');
+        setErrorMsg(t.serverError);
       }
     } finally {
       clearTimeout(timeoutId);
       setLoading(false);
+      setSubmitStage('idle');
     }
   };
 
@@ -400,8 +415,20 @@ function SubmissionForm({ language, onSubmitSuccess }) {
           <p>{t.formSubtitle}</p>
         </div>
 
-        {successMsg && <div className="alert success">{successMsg}</div>}
-        {errorMsg && <div className="alert error">{errorMsg}</div>}
+        {successMsg && <div className="alert success" role="status">{successMsg}</div>}
+        {errorMsg && <div className="alert error" role="alert">{errorMsg}</div>}
+        {loading && (
+          <div className="upload-status" role="status" aria-live="polite">
+            <span className="loading-spinner" aria-hidden="true" />
+            <span>
+              {submitStage === 'preparing'
+                ? t.preparingPhoto
+                : submitStage === 'uploading'
+                  ? t.uploadingPhoto
+                  : t.savingSubmission}
+            </span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="submission-form">
           <div>
