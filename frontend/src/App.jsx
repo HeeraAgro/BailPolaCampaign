@@ -610,7 +610,7 @@ function ThankYouPage({ language, onBack }) {
             <a href="https://www.heeraagro.com" target="_blank" rel="noreferrer">
               www.heeraagro.com
             </a>
-            <a href="https://www.youtube.com/@heeraagro" target="_blank" rel="noreferrer">
+            <a href="https://www.youtube.com/@HeeraAgroIndustries" target="_blank" rel="noreferrer">
               YouTube / Heera Agro
             </a>
           </div>
@@ -620,7 +620,7 @@ function ThankYouPage({ language, onBack }) {
           <a className="primary-button thank-button" href="https://www.heeraagro.com" target="_blank" rel="noreferrer">
             {t.visitWebsite}
           </a>
-          <a className="primary-button thank-button alt" href="https://www.youtube.com/@heeraagro" target="_blank" rel="noreferrer">
+          <a className="primary-button thank-button alt" href="https://www.youtube.com/@HeeraAgroIndustries" target="_blank" rel="noreferrer">
             {t.visitYoutube}
           </a>
         </div>
