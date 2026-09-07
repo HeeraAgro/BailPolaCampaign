@@ -6,6 +6,56 @@ import youtubeIcon from './images/Youtube.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+// Image compression utility
+const compressImage = (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set max dimensions
+        let width = img.width;
+        let height = img.height;
+        const maxWidth = 1200;
+        const maxHeight = 1200;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          'image/jpeg',
+          0.7
+        );
+      };
+    };
+  });
+};
+
 const translations = {
   mr: {
     cta: 'सहभागी व्हा',
@@ -262,27 +312,38 @@ function SubmissionForm({ language, onSubmitSuccess }) {
     setSuccessMsg('');
     setErrorMsg('');
 
-    const data = new FormData();
-    data.append('fullName', formData.fullName);
-    data.append('village', formData.village);
-    data.append('mobileNumber', formData.mobileNumber);
-    data.append('landSize', formData.landSize);
-    data.append('cropType', formData.cropType);
-    data.append('waterFacility', formData.waterFacility);
-    data.append('farmingMethod', formData.farmingMethod);
-    data.append('challenge', formData.challenge);
-    if (formData.photo) data.append('photo', formData.photo);
-
     try {
+      const data = new FormData();
+      data.append('fullName', formData.fullName);
+      data.append('village', formData.village);
+      data.append('mobileNumber', formData.mobileNumber);
+      data.append('landSize', formData.landSize);
+      data.append('cropType', formData.cropType);
+      data.append('waterFacility', formData.waterFacility);
+      data.append('farmingMethod', formData.farmingMethod);
+      data.append('challenge', formData.challenge);
+
+      if (formData.photo) {
+        // Compress image before upload
+        const compressedPhoto = await compressImage(formData.photo);
+        data.append('photo', compressedPhoto);
+      }
+
+      // Send request with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(`${API_BASE_URL}/api/campaign/submit`, {
         method: 'POST',
         body: data,
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const result = await response.json();
 
       if (response.ok && result.success) {
-        setSuccessMsg(t.thankYou);
+        // Clear form immediately
         setFormData({
           fullName: '',
           village: '',
@@ -295,17 +356,24 @@ function SubmissionForm({ language, onSubmitSuccess }) {
           photo: null,
         });
         setPreview(null);
+        setLoading(false);
+
+        // Redirect immediately to thank you page
         if (onSubmitSuccess) onSubmitSuccess();
       } else {
+        setLoading(false);
         setErrorMsg(
           result.message || result.error || 'काहीतरी चूक झाली, कृपया पुन्हा प्रयत्न करा.',
         );
       }
     } catch (error) {
-      console.error(error);
-      setErrorMsg('सर्व्हरशी संपर्क साधण्यात त्रुटी. कृपया नंतर प्रयत्न करा.');
-    } finally {
       setLoading(false);
+      console.error(error);
+      if (error.name === 'AbortError') {
+        setErrorMsg('अनुरोध टाइम आउट हुआ। कृपया पुन्हा प्रयत्न करा।');
+      } else {
+        setErrorMsg('सर्व्हरशी संपर्क साधण्यात त्रुटी. कृपया नंतर प्रयत्न करा.');
+      }
     }
   };
 

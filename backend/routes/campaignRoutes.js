@@ -91,28 +91,36 @@ router.post('/submit', uploadSubmissionPhoto, async (req, res) => {
       });
     }
 
-    const uploadedPhoto = await uploadToCloudinary(req.file.buffer);
-    const photoUrl = uploadedPhoto.secure_url;
-
-    const newSubmission = new Submission({
-      fullName,
-      village,
-      mobileNumber,
-      landSize,
-      cropType,
-      waterFacility,
-      farmingMethod,
-      challenge,
-      photoUrl,
-    });
-
-    await newSubmission.save();
-
-    return res.status(201).json({
+    // Send immediate response to frontend
+    res.status(201).json({
       success: true,
       message: 'तुमचा फोटो यशस्वीरित्या सबमिट झाला आहे!',
-      data: newSubmission,
     });
+
+    // Process upload and database save in background (non-blocking)
+    (async () => {
+      try {
+        const uploadedPhoto = await uploadToCloudinary(req.file.buffer);
+        const photoUrl = uploadedPhoto.secure_url;
+
+        const newSubmission = new Submission({
+          fullName,
+          village,
+          mobileNumber,
+          landSize,
+          cropType,
+          waterFacility,
+          farmingMethod,
+          challenge,
+          photoUrl,
+        });
+
+        await newSubmission.save();
+        console.log('Submission saved successfully:', newSubmission._id);
+      } catch (error) {
+        console.error('Background submission error:', error);
+      }
+    })();
   } catch (error) {
     console.error('Submission error:', error);
     return res.status(500).json({ success: false, error: error.message });
