@@ -3,6 +3,11 @@ import heeraLogo from './images/Heera Logo.png';
 import facebookIcon from './images/facebook.png';
 import instagramIcon from './images/Instagram.png';
 import youtubeIcon from './images/Youtube.png';
+import {
+  trackCampaignPageView,
+  trackEvent,
+  trackPageView,
+} from './analytics';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -121,7 +126,7 @@ const translations = {
     address: 'Heera Agro Industries Jalgaon, Maharashtra',
     backHome: 'मुख्य पृष्ठावर परत जा',
     footerLabel: 'सहभागी होण्याची तारीख',
-    footerDate: '7 सप्टेंबर २०२६ - 12 सप्टेंबर २०२६, रात्री ११:५९ पर्यंत सुवर्ण संधी उपलब्ध.',
+    footerDate: '8 सप्टेंबर 2026 - 12 सप्टेंबर 2026, रात्री ११:५९ पर्यंत सुवर्ण संधी उपलब्ध.',
     footerTagline: 'शेतकऱ्यांची विश्वासू हिरा ॲग्रो इंडस्ट्रीज',
     festival: 'बैल पोळा २०२६',
   },
@@ -182,7 +187,7 @@ const translations = {
     address: 'Heera Agro Industries Jalgaon, Maharashtra',
     backHome: 'मुख्य पृष्ठ पर लौटें',
     footerLabel: 'भाग लेने की तिथि',
-    footerDate: '7 सितंबर २०२६ -12 सप्टेंबर २०२६, रात ११:५९ तक शानदार अवसर उपलब्ध है।',
+    footerDate: '8 सितंबर 2026 -12 सप्टेंबर 2026, रात ११:५९ तक शानदार अवसर उपलब्ध है।',
     footerTagline: 'किसानों का भरोसा हिरा ॲग्रो इंडस्ट्रीज',
     festival: 'बैल पोला २०२६',
   },
@@ -312,6 +317,14 @@ function SubmissionForm({ language, onSubmitSuccess }) {
   const [submitStage, setSubmitStage] = React.useState('idle');
   const [successMsg, setSuccessMsg] = React.useState('');
   const [errorMsg, setErrorMsg] = React.useState('');
+  const formStarted = React.useRef(false);
+
+  const handleFormStart = () => {
+    if (formStarted.current) return;
+
+    formStarted.current = true;
+    trackEvent('form_start');
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -331,12 +344,14 @@ function SubmissionForm({ language, onSubmitSuccess }) {
     setErrorMsg('');
     setFormData((prev) => ({ ...prev, photo: file }));
     setPreview(URL.createObjectURL(file));
+    trackEvent('photo_upload');
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (loading) return;
 
+    trackEvent('form_submit');
     setLoading(true);
     setSubmitStage('preparing');
     setSuccessMsg('');
@@ -370,6 +385,7 @@ function SubmissionForm({ language, onSubmitSuccess }) {
       const result = await response.json().catch(() => ({}));
 
       if (response.ok && result.success) {
+        trackEvent('submission_success');
         // Clear form immediately
         setFormData({
           fullName: '',
@@ -386,12 +402,14 @@ function SubmissionForm({ language, onSubmitSuccess }) {
         // Redirect immediately to thank you page
         if (onSubmitSuccess) onSubmitSuccess();
       } else {
+        trackEvent('submission_error');
         setErrorMsg(
           result.message || result.error || 'काहीतरी चूक झाली, कृपया पुन्हा प्रयत्न करा.',
         );
       }
     } catch (error) {
       console.error(error);
+      trackEvent('submission_error');
       if (error.name === 'AbortError') {
         setErrorMsg(t.timeoutError);
       } else if (error.message?.includes('Photo')) {
@@ -417,20 +435,8 @@ function SubmissionForm({ language, onSubmitSuccess }) {
 
         {successMsg && <div className="alert success" role="status">{successMsg}</div>}
         {errorMsg && <div className="alert error" role="alert">{errorMsg}</div>}
-        {loading && (
-          <div className="upload-status" role="status" aria-live="polite">
-            <span className="loading-spinner" aria-hidden="true" />
-            <span>
-              {submitStage === 'preparing'
-                ? t.preparingPhoto
-                : submitStage === 'uploading'
-                  ? t.uploadingPhoto
-                  : t.savingSubmission}
-            </span>
-          </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="submission-form">
+        <form onSubmit={handleSubmit} onFocus={handleFormStart} className="submission-form">
           <div>
             <label>👤 {t.nameLabel}</label>
             <input
@@ -556,6 +562,19 @@ function SubmissionForm({ language, onSubmitSuccess }) {
             <span>🐂</span>
             <span>{loading ? t.submitting : t.submit}</span>
           </button>
+
+          {loading && (
+            <div className="upload-status" role="status" aria-live="polite">
+              <span className="loading-spinner" aria-hidden="true" />
+              <span>
+                {submitStage === 'preparing'
+                  ? t.preparingPhoto
+                  : submitStage === 'uploading'
+                    ? t.uploadingPhoto
+                    : t.savingSubmission}
+              </span>
+            </div>
+          )}
         </form>
 
         <p className="privacy-note">🔒 {t.privacy}</p>
@@ -680,12 +699,18 @@ export default function App() {
 
   React.useEffect(() => {
     const currentHash = window.location.hash;
+    trackPageView();
+    if (currentHash !== '#thank-you') trackCampaignPageView();
+
     if (currentHash === '#thank-you') {
       setView('thankyou');
     }
 
     const onHashChange = () => {
-      setView(window.location.hash === '#thank-you' ? 'thankyou' : 'landing');
+      const isThankYouPage = window.location.hash === '#thank-you';
+      setView(isThankYouPage ? 'thankyou' : 'landing');
+      trackPageView();
+      if (!isThankYouPage) trackCampaignPageView();
     };
 
     window.addEventListener('hashchange', onHashChange);

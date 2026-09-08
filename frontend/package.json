@@ -11,7 +11,8 @@
   "dependencies": {
     "lit": "^3.3.3",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-ga4": "^3.0.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
