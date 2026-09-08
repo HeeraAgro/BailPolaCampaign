@@ -600,7 +600,7 @@ function Footer({ language }) {
     {
       name: 'Instagram',
       icon: instagramIcon,
-      url: 'https://www.instagram.com/heeraagro5?stkn=aXM0dG00czR1cjg4',
+      url: 'https://www.instagram.com/heeraagro?stkn=cG5xMndhOXVpdGlj',
     },
   ];
 
