@@ -54,7 +54,8 @@ const compressImage = (file) => {
               return;
             }
 
-            const compressedFile = new File([blob], file.name, {
+            const baseName = (file.name || 'photo').replace(/\.[^/.]+$/, '');
+            const compressedFile = new File([blob], `${baseName}.jpg`, {
               type: 'image/jpeg',
               lastModified: Date.now(),
             });
@@ -550,7 +551,7 @@ function SubmissionForm({ language, onSubmitSuccess }) {
               <input
                 type="file"
                 name="photo"
-                accept="image/png, image/jpeg, image/jpg"
+                accept="image/png, image/jpeg, image/jpg, image/webp"
                 onChange={handleFileChange}
                 required
                 className="hidden-input"
